@@ -15,11 +15,6 @@ public class DroppedStaff : MonoBehaviour
         inventory = GameObject.FindGameObjectWithTag("Inventory").GetComponent<Inventory>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
     public void GiveStaffData(StaffInfo new_info)
     {
         staffInfo = new_info;

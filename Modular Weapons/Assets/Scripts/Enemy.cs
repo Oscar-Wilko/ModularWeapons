@@ -8,18 +8,17 @@ public class Enemy : MonoBehaviour
     private float max_health = 10;
     private float move_speed;
 
-    // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         health = max_health;
     }
 
-    // Update is called once per frame
     void Update()
     {
         // Future AI stuff
     }
 
+    // Damage fucntionality
     public bool TakeDamage(float damage)
     {
         health -= damage;
@@ -31,6 +30,7 @@ public class Enemy : MonoBehaviour
         return false;
     }
 
+    // Death / removal functionality
     private void Die()
     {
         Destroy(this.gameObject);

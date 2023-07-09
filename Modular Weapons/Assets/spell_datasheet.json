@@ -1,31 +1,121 @@
 {
   "spell_data": [
     {
-      "ID": 0,
-      "name": "blank",
-      "cast_delay": 0.0,
-      "reload_delay": 0.0,
-      "multicast_bonus": 0,
-      "img_filename": "blank",
-      "type": "Blank"
-    },
-    {
-      "ID": 1,
       "name": "Projectile",
       "cast_delay": 0.1,
       "reload_delay": 0.1,
       "multicast_bonus": 0,
       "img_filename": "projectile_1",
-      "type": "Projectile"
+      "type": 1,
+      "decay_type": 0
     },
     {
-      "ID": 2,
+      "name": "Trigger Projectile",
+      "cast_delay": 0.1,
+      "reload_delay": 0.1,
+      "multicast_bonus": 0,
+      "img_filename": "projectile_1",
+      "type": 1,
+      "decay_type": 1
+    },
+    {
+      "name": "Timer Projectile",
+      "cast_delay": 0.1,
+      "reload_delay": 0.1,
+      "multicast_bonus": 0,
+      "img_filename": "projectile_1",
+      "type": 1,
+      "decay_type": 2
+    },
+    {
+      "name": "Detonate Projectile",
+      "cast_delay": 0.1,
+      "reload_delay": 0.1,
+      "multicast_bonus": 0,
+      "img_filename": "projectile_1",
+      "type": 1,
+      "decay_type": 3
+    },
+    {
       "name": "Burst Projectile",
       "cast_delay": 0.01,
       "reload_delay": 0.2,
       "multicast_bonus": 0,
-      "img_filename": "projectile_1",
-      "type": "Projectile"
+      "img_filename": "projectile_2",
+      "type": 1,
+      "decay_type": 0
+    },
+    {
+      "name": "Speed Up",
+      "cast_delay": 0.1,
+      "reload_delay": 0.0,
+      "multicast_bonus": 0,
+      "img_filename": "speed_up",
+      "type": 2,
+      "decay_type": 0
+    },
+    {
+      "name": "Speed Down",
+      "cast_delay": -0.2,
+      "reload_delay": 0.0,
+      "multicast_bonus": 0,
+      "img_filename": "speed_down",
+      "type": 2,
+      "decay_type": 0
+    },
+    {
+      "name": "Damage Up",
+      "cast_delay": 0.0,
+      "reload_delay": 0.0,
+      "multicast_bonus": 0,
+      "img_filename": "damage_up",
+      "type": 2,
+      "decay_type": 0
+    },
+    {
+      "name": "Acceleration",
+      "cast_delay": 0.0,
+      "reload_delay": 0.0,
+      "multicast_bonus": 0,
+      "img_filename": "accelerate",
+      "type": 2,
+      "decay_type": 0
+    },
+    {
+      "name": "Double Cast",
+      "cast_delay": 0.0,
+      "reload_delay": 0.0,
+      "multicast_bonus": 2,
+      "img_filename": "double_cast",
+      "type": 3,
+      "decay_type": 0
+    },
+    {
+      "name": "Triple Cast",
+      "cast_delay": 0.0,
+      "reload_delay": 0.0,
+      "multicast_bonus": 3,
+      "img_filename": "triple_cast",
+      "type": 3,
+      "decay_type": 0
+    },
+    {
+      "name": "Quad Cast",
+      "cast_delay": 0.0,
+      "reload_delay": 0.0,
+      "multicast_bonus": 4,
+      "img_filename": "quad_cast",
+      "type": 3,
+      "decay_type": 0
+    },
+    {
+      "name": "Penta Cast",
+      "cast_delay": 0.0,
+      "reload_delay": 0.0,
+      "multicast_bonus": 5,
+      "img_filename": "penta_cast",
+      "type": 3,
+      "decay_type": 0
     }
   ]
 }

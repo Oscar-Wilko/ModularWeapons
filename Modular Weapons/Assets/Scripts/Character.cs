@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class Character : MonoBehaviour
@@ -47,7 +48,7 @@ public class Character : MonoBehaviour
             if (Input.GetKey(right_input) || Input.GetKey(s_right_input)) move_vec += Vector3.right;
             if (Input.GetKey(up_input) || Input.GetKey(s_up_input)) move_vec += Vector3.up;
             if (Input.GetKey(down_input) || Input.GetKey(s_down_input)) move_vec += Vector3.down;
-            if (Input.GetKey(interact_input)) { Interact(); }
+            if (Input.GetKeyDown(interact_input)) { Interact(); }
 
             this.transform.position += move_vec * move_speed * Time.deltaTime;
         }
@@ -55,23 +56,51 @@ public class Character : MonoBehaviour
 
     private void Interact()
     {
-        GameObject[] dropped_spells = GameObject.FindGameObjectsWithTag("DroppedSpell");
-        foreach(GameObject spell in dropped_spells)
+        GameObject closest_interactable;
+
+        // FOR DROPPED SPELLS
+        closest_interactable = FindClosestObject(GameObject.FindGameObjectsWithTag("DroppedSpell"), interact_range);
+        // If there is an object in range
+        if (closest_interactable != null)
         {
-            if (Vector3.Distance(transform.position, spell.transform.position) <= interact_range)
-            {
-                spell.GetComponent<DroppedSpell>().Interact();
-            }
+            // Interact and exit
+            closest_interactable.GetComponent<DroppedSpell>().Interact();
+            return;
         }
 
-        GameObject[] dropped_staffs = GameObject.FindGameObjectsWithTag("DroppedStaff");
-        foreach(GameObject staff in dropped_staffs)
+        // FOR DROPPED STAFFS
+        closest_interactable = FindClosestObject(GameObject.FindGameObjectsWithTag("DroppedStaff"), interact_range);
+        // If there is an object in range
+        if (closest_interactable != null)
         {
-            if (Vector3.Distance(transform.position, staff.transform.position) <= interact_range)
+            // Interact and exit
+            closest_interactable.GetComponent<DroppedStaff>().Interact();
+            return;
+        }
+    }
+
+    private GameObject FindClosestObject(GameObject[] objects, float range)
+    { 
+        float lowest_distance = -1;
+        GameObject closest_object = null;
+        // For each object in current pool
+        foreach (GameObject obj in objects)
+        {
+            // If within range of interaction
+            float distance = Vector3.Distance(transform.position, obj.transform.position);
+            if (distance <= interact_range)
             {
-                staff.GetComponent<DroppedStaff>().Interact();
+                // And the closest object so far
+                if (distance <= lowest_distance || lowest_distance == -1)
+                {
+                    // Update new distance and object to this
+                    lowest_distance = distance;
+                    closest_object = obj;
+                }
             }
         }
+        // Return object (even if null)
+        return closest_object;
     }
 
     private bool CanUseStaff()

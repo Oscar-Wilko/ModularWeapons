@@ -15,6 +15,7 @@ public class CameraControl : MonoBehaviour
         focal_point = player_transform;
     }
 
+    // Change targeted transform for camera
     public void ChangeFocalPoint(Transform new_point)
     {
         focal_point = new_point;

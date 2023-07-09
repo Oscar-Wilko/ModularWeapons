@@ -15,12 +15,6 @@ public class DroppedSpell : MonoBehaviour
         inventory = GameObject.FindGameObjectWithTag("Inventory").GetComponent<Inventory>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void GiveSpellData(SpellInfo new_info)
     {
         spellInfo = new_info;

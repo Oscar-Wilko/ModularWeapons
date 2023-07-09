@@ -3,17 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// -------------------------------------------- ENUMS AND STRUCTS --------------------------------------------
 public enum SpellType
 {
     Blank = 0,
     Projectile = 1,
     Modifier = 2,
     Multicast = 3
+}  
+public enum DecayType
+{
+    Default = 0,
+    Trigger = 1,
+    Timer = 2,
+    Detonate = 3
 }    
-
 public struct SpellInfo
 {
-    public SpellInfo(string _name, SpellType _type, float _cast_d, float _reload_d, int _multicast_bonus, string _img_filename)
+    public SpellInfo(string _name, SpellType _type, float _cast_d, float _reload_d, int _multicast_bonus, string _img_filename, DecayType _decay_type)
     {
         name = _name;
         type = _type;
@@ -21,6 +28,7 @@ public struct SpellInfo
         reload_delay = _reload_d;
         multicast_bonus = _multicast_bonus;
         img_filename = _img_filename;
+        decay_type = _decay_type;
     }
     public string name;
     public SpellType type;
@@ -28,8 +36,8 @@ public struct SpellInfo
     public float reload_delay;
     public int multicast_bonus;
     public string img_filename;
+    public DecayType decay_type;
 }
-
 public struct StaffInfo
 {
     public StaffInfo(string _name, float _cast_d, float _reload_d, int _spell_per, SpellInfo[] _spell_inv, string _img_filename)
@@ -48,34 +56,39 @@ public struct StaffInfo
     public SpellInfo[] spell_inventory;
     public string img_filename;
 }
+// -----------------------------------------------------------------------------------------------------------
 
 public class Staff : MonoBehaviour
 {
     // REFERENCES
-    public GameObject projectile_prefab;        // Prefab for projectile object
-    public Transform fire_position;             // Location of where projectiles are shot
+    public GameObject projectile_prefab;                        // Prefab for projectile object
+    public Transform fire_position;                             // Location of where projectiles are shot
     private GameData game_data;
 
     // FIRING INFO
-    private int spell_tracker = 0;              // Tracker for which spell in the staff inventory it is currently on
-    private int spells_to_cast = 0;             // Tracker for how many spells are left to cast
-    private Queue<SpellInfo> mod_queue = new Queue<SpellInfo>();// Current queue of modifiers for future projectiles
-    private float delay_tracker = 0.0f;         // Tracker to tell when to shoot
+    private int spell_tracker = 0;                              // Tracker for which spell in the staff inventory it is currently on
+    private int spells_to_cast = 0;                             // Tracker for how many spells are left to cast
+    private List<SpellInfo> mod_list = new List<SpellInfo>();   // Current list of modifiers for future projectiles
+    private float delay_tracker = 0.0f;                         // Tracker to tell when to shoot
     private float reload_tracker = 0.0f;
 
     // ANIMATION VARIABLES
-    private float max_dist_x = 1.0f;            // Max X offset of staff around player
-    private float max_dist_y = 0.5f;            // Max Y offset of staff around player
-    private float right_rot = 0;                // Z Rotation of staff at far right pos
-    private float left_rot = 80;                // Z Rotation of staff at far left pos
+    private float max_dist_x = 1.0f;                            // Max X offset of staff around player
+    private float max_dist_y = 0.5f;                            // Max Y offset of staff around player
+    private float right_rot = 0;                                // Z Rotation of staff at far right pos
+    private float left_rot = 80;                                // Z Rotation of staff at far left pos
 
     // OTHER
-    private int selected_staff;                 // Staff number
+    private int selected_staff;                                 // Staff number
+
+    private void Awake()
+    {
+        game_data = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameData>();
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        game_data = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameData>();
         UpdateStaffVisual();
     }
 
@@ -103,13 +116,12 @@ public class Staff : MonoBehaviour
     public void AttemptToFire()
     {
         if (game_data.staff_inventory[selected_staff].name == "blank") return;
+        if (delay_tracker > 0) return;
         spells_to_cast = game_data.staff_inventory[selected_staff].spells_per_shot;
         // Keep going through spells until no more spells to cast
-        while (spells_to_cast > 0 && delay_tracker <= 0)
+        while (spells_to_cast > 0)
         {
             SpellInfo cur_spell = game_data.staff_inventory[selected_staff].spell_inventory[spell_tracker];
-            Debug.Log(cur_spell);
-            Debug.Log(cur_spell.type);
             // Depending on spell type
             switch (cur_spell.type)
             {
@@ -120,20 +132,37 @@ public class Staff : MonoBehaviour
                 case SpellType.Projectile:
                     // Generate projectile with current modifiers
                     GameObject proj = Instantiate(projectile_prefab, fire_position.position, Quaternion.identity);
-                    proj.GetComponent<Projectile>().GiveModifiers(mod_queue);
-                    proj.GetComponent<Projectile>().ShootAtTarget(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                    proj.name = "Projectile";
+                    Projectile proj_comp = proj.GetComponent<Projectile>();
+                    proj_comp.AssignTexture(cur_spell.img_filename);
+                    proj_comp.GiveModifiers(mod_list);
+                    proj_comp.ShootAtTarget(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                    // If projectile has a decay effect
+                    if (cur_spell.decay_type != DecayType.Default)
+                    {
+                        // Then give next payload of spells
+                        proj_comp.GiveDecayType(cur_spell.decay_type);
+                        SpellInfo[] next_payload = GetNextPayload(spell_tracker + 1, game_data.staff_inventory[selected_staff].spell_inventory);
+                        proj_comp.GiveSpellPayload(next_payload);
+                        // And move tracker past those spells
+                        spell_tracker += next_payload.Length;
+                    }
                     spells_to_cast--;
                     if (spells_to_cast == 0)
                     {
-                        mod_queue.Clear();
+                        mod_list.Clear();
                     }
-                    delay_tracker += game_data.staff_inventory[selected_staff].base_cast_delay;
+                    // Update delays
+                    delay_tracker += game_data.staff_inventory[selected_staff].base_cast_delay + cur_spell.cast_delay;
                     reload_tracker += cur_spell.reload_delay;
                     break;
 
                 case SpellType.Modifier:
                     // Stack modifiers
-                    mod_queue.Enqueue(cur_spell);
+                    mod_list.Add(cur_spell);
+                    // Update delays
+                    delay_tracker += cur_spell.cast_delay;
+                    reload_tracker += cur_spell.reload_delay;
                     break;
 
                 case SpellType.Multicast:
@@ -148,6 +177,8 @@ public class Staff : MonoBehaviour
                 delay_tracker += game_data.staff_inventory[selected_staff].base_reload_delay + reload_tracker;
                 reload_tracker = 0;
                 spell_tracker = 0;
+                spells_to_cast = 0;
+                mod_list.Clear();
             }
             // Or continue onto next spell slot
             else
@@ -155,6 +186,45 @@ public class Staff : MonoBehaviour
                 spell_tracker++;
             }
         }
+    }
+
+    /// <summary>
+    /// Go through spells to dictate what spells will be in the next payload
+    /// </summary>
+    /// <param name="start_index">Starting position in spell list to check from</param>
+    /// <param name="payload">Spell list to check</param>
+    /// <returns>Array of spells that would be in the next payload</returns>
+    static public SpellInfo[] GetNextPayload(int start_index, SpellInfo[] payload)
+    {
+        int spells_to_cast = 1;
+        List<SpellInfo> tracked_payload = new List<SpellInfo>();
+        // Go through the spell list from the given index
+        for (int i = start_index; i < payload.Length && spells_to_cast > 0; i++)
+        {
+            // Add to tracked list
+            tracked_payload.Add(payload[i]);
+            switch (payload[i].type)
+            {
+                case SpellType.Projectile:
+                    // If special decay projectile then recursively get next payload
+                    if (payload[i].decay_type != DecayType.Default)
+                    {
+                        SpellInfo[] next_payload = GetNextPayload(i + 1, payload);
+                        foreach (SpellInfo spell in next_payload) { tracked_payload.Add(spell); }
+                        i += next_payload.Length;
+                    }
+                    spells_to_cast--;
+                    break;
+                case SpellType.Multicast:
+                    // Increase spells to cast by multicast amount
+                    spells_to_cast += payload[i].multicast_bonus - 1;
+                    break;
+            }
+        }
+        // Convert the LIST into an ARRAY and return it back
+        SpellInfo[] spell_array = new SpellInfo[tracked_payload.Count];
+        for (int i = 0; i < tracked_payload.Count; i++) { spell_array[i] = tracked_payload[i]; }
+        return spell_array;
     }
 
     /// <summary>
@@ -191,7 +261,7 @@ public class Staff : MonoBehaviour
     /// <summary>
     /// Go to next or previous staff based on mouse scroll
     /// </summary>
-    /// <param name="delta_scroll"></param>
+    /// <param name="delta_scroll">Change in mouse scroll</param>
     private void CycleStaff(float delta_scroll)
     {
         int staff_index = selected_staff;
@@ -215,26 +285,30 @@ public class Staff : MonoBehaviour
                 selected_staff = staff_index;
                 spell_tracker = 0;
                 reload_tracker = 0;
-                mod_queue.Clear();
+                mod_list.Clear();
                 UpdateStaffVisual();
                 return;
             }
         }
     }
 
+    /// <summary>
+    /// Go to chosen staff based on key input
+    /// </summary>
+    /// <param name="new_staff_index">Staff Number</param>
     private void ChangeStaff(int new_staff_index)
     {
         selected_staff = new_staff_index;
         spell_tracker = 0;
         reload_tracker = 0;
-        mod_queue.Clear();
+        mod_list.Clear();
         UpdateStaffVisual();
     }
 
     /// <summary>
     /// Update staff if it should not appear based on selected staff type
     /// </summary>
-    private void UpdateStaffVisual()
+    public void UpdateStaffVisual()
     {
         this.gameObject.GetComponent<SpriteRenderer>().enabled = (game_data.staff_inventory[selected_staff].name != "blank");
         // Future modular visuals based on staff stats
