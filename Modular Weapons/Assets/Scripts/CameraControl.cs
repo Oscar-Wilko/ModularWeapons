@@ -7,7 +7,7 @@ public class CameraControl : MonoBehaviour
     private Transform focal_point;
     public Transform player_transform;
     private float mouse_influence = 2.0f;
-    private float cam_transition_scale = 0.01f; // Between 1.0 -> 0.0
+    private float cam_transition_scale = 0.025f; // Between 1.0 -> 0.0
     private Vector3 current_track_point;
     // Start is called before the first frame update
     void Start()
@@ -22,7 +22,7 @@ public class CameraControl : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         // Calculate offset from camera and mouse position
         Vector3 difference = Camera.main.ScreenToWorldPoint(Input.mousePosition) - focal_point.position;

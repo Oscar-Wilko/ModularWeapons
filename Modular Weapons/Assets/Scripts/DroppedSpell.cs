@@ -21,11 +21,13 @@ public class DroppedSpell : MonoBehaviour
         this.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(spellInfo.img_filename);
     }
 
-    public void Interact()
+    public bool Interact()
     {
         if (inventory.PickUpSpell(spellInfo))
         {
             Destroy(gameObject);
+            return true;
         }
+        return false;
     }
 }

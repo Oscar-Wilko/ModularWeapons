@@ -1,28 +1,52 @@
 {
-  "staff_data": [
+  "handle_data": [
     {
-      "name": "Staff",
+      "name": "Standard",
       "cast_delay": 0.1,
       "reload_delay": 0.2,
-      "spells_per_shot": 1,
-      "inventory_size": 6,
-      "img_filename": "staff_1"
+      "img_filename": "handle_1"
     },
     {
-      "name": "Burst Staff",
-      "cast_delay": 0.01,
-      "reload_delay": 0.4,
-      "spells_per_shot": 1,
-      "inventory_size": 8,
-      "img_filename": "staff_1"
-    },
-    {
-      "name": "Rapid Staff",
+      "name": "Stronger",
       "cast_delay": 0.05,
       "reload_delay": 0.1,
+      "img_filename": "handle_2"
+    }
+  ],
+  "orb_data": [
+    {
+      "name": "Standard",
+      "capacity": 8,
+      "img_filename": "orb_1"
+    },
+    {
+      "name": "Stronger",
+      "capacity": 10,
+      "img_filename": "orb_2"
+    }
+  ],
+  "cover_data": [
+    {
+      "name": "Standard",
       "spells_per_shot": 1,
-      "inventory_size": 4,
-      "img_filename": "staff_1"
+      "base_damage": 1,
+      "img_filename": "cover_1"
+    },
+    {
+      "name": "Stronger",
+      "spells_per_shot": 1,
+      "base_damage": 3,
+      "img_filename": "cover_2"
+    }
+  ],
+  "connector_data": [
+    {
+      "name": "Standard",
+      "img_filename": "connector_1"
+    },
+    {
+      "name": "Stronger",
+      "img_filename": "connector_2"
     }
   ]
 }

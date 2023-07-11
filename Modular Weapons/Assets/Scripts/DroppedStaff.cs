@@ -7,6 +7,10 @@ public class DroppedStaff : MonoBehaviour
     private StaffInfo staffInfo;
     private GameData gameData;
     private Inventory inventory;
+    public SpriteRenderer handle;
+    public SpriteRenderer orb;
+    public SpriteRenderer cover;
+    public SpriteRenderer connector;
 
     // Start is called before the first frame update
     void Start()
@@ -18,14 +22,19 @@ public class DroppedStaff : MonoBehaviour
     public void GiveStaffData(StaffInfo new_info)
     {
         staffInfo = new_info;
-        this.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(staffInfo.img_filename);
+        handle.sprite = Resources.Load<Sprite>(staffInfo.handle.img_filename);
+        orb.sprite = Resources.Load<Sprite>(staffInfo.orb.img_filename);
+        cover.sprite = Resources.Load<Sprite>(staffInfo.cover.img_filename);
+        connector.sprite = Resources.Load<Sprite>(staffInfo.connector.img_filename);
     }
 
-    public void Interact()
+    public bool Interact()
     {
         if (inventory.PickUpStaff(staffInfo))
         {
             Destroy(gameObject);
+            return true;
         }
+        return false;
     }
 }

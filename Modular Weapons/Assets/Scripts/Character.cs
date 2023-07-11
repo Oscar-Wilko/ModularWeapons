@@ -7,8 +7,10 @@ public class Character : MonoBehaviour
 {
     public GameObject staff;
     private float move_speed = 5.0f;
-    private float interact_range = 2.0f;
+    private float interact_range = 1.0f;
     private GameData gameData;
+    private Rigidbody2D rb;
+    private Vector2 movement_input;
     // Primary Inputs
     private KeyCode fire_input = KeyCode.Mouse0;
     private KeyCode left_input = KeyCode.A;
@@ -27,6 +29,7 @@ public class Character : MonoBehaviour
     void Start()
     {
         gameData = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameData>();
+        rb = this.GetComponent<Rigidbody2D>();
     }
 
     // Update is called once per frame
@@ -43,14 +46,20 @@ public class Character : MonoBehaviour
 
         if (CanMove())
         {
-            Vector3 move_vec = Vector3.zero;
-            if (Input.GetKey(left_input) || Input.GetKey(s_left_input)) move_vec += Vector3.left;
-            if (Input.GetKey(right_input) || Input.GetKey(s_right_input)) move_vec += Vector3.right;
-            if (Input.GetKey(up_input) || Input.GetKey(s_up_input)) move_vec += Vector3.up;
-            if (Input.GetKey(down_input) || Input.GetKey(s_down_input)) move_vec += Vector3.down;
+            movement_input = Vector2.zero;
+            if (Input.GetKey(left_input) || Input.GetKey(s_left_input)) movement_input += Vector2.left;
+            if (Input.GetKey(right_input) || Input.GetKey(s_right_input)) movement_input += Vector2.right;
+            if (Input.GetKey(up_input) || Input.GetKey(s_up_input)) movement_input += Vector2.up;
+            if (Input.GetKey(down_input) || Input.GetKey(s_down_input)) movement_input += Vector2.down;
             if (Input.GetKeyDown(interact_input)) { Interact(); }
+        }
+    }
 
-            this.transform.position += move_vec * move_speed * Time.deltaTime;
+    private void FixedUpdate()
+    {
+        if (CanMove())
+        {
+            rb.MovePosition(rb.position + movement_input.normalized * move_speed * Time.fixedDeltaTime);
         }
     }
 
@@ -64,8 +73,7 @@ public class Character : MonoBehaviour
         if (closest_interactable != null)
         {
             // Interact and exit
-            closest_interactable.GetComponent<DroppedSpell>().Interact();
-            return;
+            if (closest_interactable.GetComponent<DroppedSpell>().Interact()) return;
         }
 
         // FOR DROPPED STAFFS
@@ -74,8 +82,7 @@ public class Character : MonoBehaviour
         if (closest_interactable != null)
         {
             // Interact and exit
-            closest_interactable.GetComponent<DroppedStaff>().Interact();
-            return;
+            if (closest_interactable.GetComponent<DroppedStaff>().Interact()) return;
         }
     }
 

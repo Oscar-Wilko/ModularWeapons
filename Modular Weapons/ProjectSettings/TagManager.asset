@@ -3,7 +3,13 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Inventory
+  - Wall
+  - GameManager
+  - Enemy
+  - DroppedSpell
+  - DroppedStaff
   layers:
   - Default
   - TransparentFX
@@ -38,6 +44,15 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Floor
+    uniqueID: 2035449485
+    locked: 0
+  - name: Walls
+    uniqueID: 2508953427
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Darkness
+    uniqueID: 1320783053
     locked: 0

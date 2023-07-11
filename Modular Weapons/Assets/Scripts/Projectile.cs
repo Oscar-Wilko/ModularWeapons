@@ -17,13 +17,15 @@ public class Projectile : MonoBehaviour
     private List<SpellInfo> modifiers = new List<SpellInfo>();
     private SpellInfo[] spell_payload;
 
-    private Vector3 velocity;
+    private Vector2 velocity;
     private Vector3 previous_position;
+    private Rigidbody2D rb;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        
+        rb = GetComponent<Rigidbody2D>();
+        previous_position = rb.position;
     }
 
     // Update is called once per frame
@@ -45,7 +47,6 @@ public class Projectile : MonoBehaviour
 
         // Decay timer
         proj_timer += Time.deltaTime;
-        this.transform.position += velocity * Time.deltaTime * proj_speed;
         if (proj_timer >= decay_trigger && decay_type == DecayType.Timer && !sent_payload) 
         { 
             SendPayload(velocity); 
@@ -57,16 +58,17 @@ public class Projectile : MonoBehaviour
         }
     }
 
-    private void LateUpdate()
-    {
-        previous_position = transform.position;
+    private void FixedUpdate()
+    {   
+        previous_position = rb.position;      
+        rb.MovePosition(rb.position + velocity * Time.fixedDeltaTime * proj_speed);
     }
 
     /// <summary>
     /// Pass through all necessary variables to shoot projectile
     /// </summary>
     /// <returns>Boolean on if the projectile is shot or not able to be generated</returns>
-    public bool ShootWithDir(Vector3 fire_dir)
+    public bool ShootWithDir(Vector2 fire_dir)
     {
         velocity = fire_dir;
         velocity = velocity.normalized;
@@ -76,13 +78,14 @@ public class Projectile : MonoBehaviour
     /// Pass through all necessary variables to shoot projectile
     /// </summary>
     /// <returns>Boolean on if the projectile is shot or not able to be generated</returns>
-    public bool ShootAtTarget(Vector3 fire_target)
+    public bool ShootAtTarget(Vector2 fire_target)
     {
-        velocity = fire_target - this.transform.position;
-        velocity.z = 0;
+        velocity = fire_target - rb.position;
         velocity = velocity.normalized;
         return true;
     }
+    public bool ShootWithDir(Vector3 fire_dir) { return ShootWithDir(new Vector2(fire_dir.x, fire_dir.y)); }
+    public bool ShootAtTarget(Vector3 fire_target) { return ShootAtTarget(new Vector2(fire_target.x, fire_target.y)); }
 
     public void GiveModifiers(List<SpellInfo> mods) 
     { 
@@ -140,6 +143,7 @@ public class Projectile : MonoBehaviour
                 break;
             case "Player":
                 // Player stuff here
+                Debug.Log("Hit Player");
                 break;
             case "Wall":
                 // Wall stuff here

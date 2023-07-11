@@ -36,7 +36,7 @@ public class Inventory : MonoBehaviour
 
     // OBJECT REFERENCES
     public RawImage[] spell_inv_images;
-    public RawImage[] staff_inv_images;
+    public StaffVisualizer[] staff_inv_images;
     public GameObject[] middle_staffs;
     public GameObject[,] staff_spell_images;
     public Transform[] staff_spell_anchors;
@@ -147,8 +147,8 @@ public class Inventory : MonoBehaviour
         // Update staff object being held by player
         staff_ref.UpdateStaffVisual();
         // Update staff images in UI
-        staff_inv_images[index].texture = Resources.Load<Texture2D>(gameData.staff_inventory[index].img_filename);
-        middle_staffs[index].GetComponent<RawImage>().texture = Resources.Load<Texture2D>(gameData.staff_inventory[index].img_filename);
+        staff_inv_images[index].UpdateVisual(gameData.staff_inventory[index]);
+        middle_staffs[index].GetComponent<StaffVisualizer>().UpdateVisual(gameData.staff_inventory[index]);
         // Toggle active state based on it being a blank staff or not
         middle_staffs[index].SetActive(gameData.staff_inventory[index].name != gameData.blank_staff.name);
         // Update all slots active state and texture
@@ -182,6 +182,7 @@ public class Inventory : MonoBehaviour
         // Swap image
         held_spell.transform.GetChild(0).GetComponent<RawImage>().texture = Resources.Load<Texture2D>(held_spell_info.img_filename);
         spell_inv_images[index].texture = Resources.Load<Texture2D>(gameData.spell_inventory[index].img_filename);
+
         holding_spell = held_spell_info.name != gameData.blank_spell.name;
     }
 
@@ -199,10 +200,10 @@ public class Inventory : MonoBehaviour
         gameData.staff_inventory[index] = temp;
 
         // Swap image
-        held_staff.transform.GetChild(0).GetComponent<RawImage>().texture = Resources.Load<Texture2D>(held_staff_info.img_filename);
-        staff_inv_images[index].texture = Resources.Load<Texture2D>(gameData.staff_inventory[index].img_filename);
-        holding_staff = held_staff_info.name != gameData.blank_staff.name;
+        held_staff.GetComponent<StaffVisualizer>().UpdateVisual(held_staff_info);
+        staff_inv_images[index].UpdateVisual(temp);
 
+        holding_staff = held_staff_info.name != gameData.blank_staff.name;
         RefreshIndividualStaff(index);
     }
 

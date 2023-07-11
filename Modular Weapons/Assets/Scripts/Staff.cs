@@ -40,20 +40,68 @@ public struct SpellInfo
 }
 public struct StaffInfo
 {
-    public StaffInfo(string _name, float _cast_d, float _reload_d, int _spell_per, SpellInfo[] _spell_inv, string _img_filename)
+    public StaffInfo(string _name, SpellInfo[] _spell_inv, StaffHandleInfo _handle, StaffOrbInfo _orb, StaffCoverInfo _cover, StaffConnectorInfo _connector)
+    {
+        name = _name;
+        spell_inventory = _spell_inv;
+        handle = _handle;
+        orb = _orb;
+        cover = _cover;
+        connector = _connector;
+    }
+    public string name;
+    public SpellInfo[] spell_inventory;
+    public StaffHandleInfo handle;
+    public StaffOrbInfo orb;
+    public StaffCoverInfo cover;
+    public StaffConnectorInfo connector;
+}
+public struct StaffHandleInfo
+{
+    public StaffHandleInfo(string _name, float _cast_d, float _reload_d, string _img_file)
     {
         name = _name;
         base_cast_delay = _cast_d;
         base_reload_delay = _reload_d;
-        spells_per_shot = _spell_per;
-        spell_inventory = _spell_inv;
-        img_filename = _img_filename;
+        img_filename = _img_file;
     }
     public string name;
     public float base_cast_delay;
     public float base_reload_delay;
+    public string img_filename;
+}
+public struct StaffOrbInfo
+{
+    public StaffOrbInfo(string _name, int _cap, string _img_file)
+    {
+        name = _name;
+        capacity = _cap;
+        img_filename = _img_file;
+    }
+    public string name;
+    public int capacity;
+    public string img_filename;
+}
+public struct StaffCoverInfo
+{
+    public StaffCoverInfo(string _name, int _spell_per, string _img_file)
+    {
+        name = _name;
+        spells_per_shot = _spell_per;
+        img_filename = _img_file;
+    }
+    public string name;
     public int spells_per_shot;
-    public SpellInfo[] spell_inventory;
+    public string img_filename;
+}
+public struct StaffConnectorInfo
+{
+    public StaffConnectorInfo(string _name, string _img_file)
+    {
+        name = _name;
+        img_filename = _img_file;
+    }
+    public string name;
     public string img_filename;
 }
 // -----------------------------------------------------------------------------------------------------------
@@ -64,6 +112,10 @@ public class Staff : MonoBehaviour
     public GameObject projectile_prefab;                        // Prefab for projectile object
     public Transform fire_position;                             // Location of where projectiles are shot
     private GameData game_data;
+    public SpriteRenderer staff_handle;
+    public SpriteRenderer staff_orb;
+    public SpriteRenderer staff_cover;
+    public SpriteRenderer staff_connector;
 
     // FIRING INFO
     private int spell_tracker = 0;                              // Tracker for which spell in the staff inventory it is currently on
@@ -117,7 +169,7 @@ public class Staff : MonoBehaviour
     {
         if (game_data.staff_inventory[selected_staff].name == "blank") return;
         if (delay_tracker > 0) return;
-        spells_to_cast = game_data.staff_inventory[selected_staff].spells_per_shot;
+        spells_to_cast = game_data.staff_inventory[selected_staff].cover.spells_per_shot;
         // Keep going through spells until no more spells to cast
         while (spells_to_cast > 0)
         {
@@ -153,7 +205,7 @@ public class Staff : MonoBehaviour
                         mod_list.Clear();
                     }
                     // Update delays
-                    delay_tracker += game_data.staff_inventory[selected_staff].base_cast_delay + cur_spell.cast_delay;
+                    delay_tracker += game_data.staff_inventory[selected_staff].handle.base_cast_delay + cur_spell.cast_delay;
                     reload_tracker += cur_spell.reload_delay;
                     break;
 
@@ -174,7 +226,7 @@ public class Staff : MonoBehaviour
             // End loop depending on reaching final spell
             if (FinalSpell(spell_tracker))
             {
-                delay_tracker += game_data.staff_inventory[selected_staff].base_reload_delay + reload_tracker;
+                delay_tracker += game_data.staff_inventory[selected_staff].handle.base_reload_delay + reload_tracker;
                 reload_tracker = 0;
                 spell_tracker = 0;
                 spells_to_cast = 0;
@@ -310,7 +362,16 @@ public class Staff : MonoBehaviour
     /// </summary>
     public void UpdateStaffVisual()
     {
-        this.gameObject.GetComponent<SpriteRenderer>().enabled = (game_data.staff_inventory[selected_staff].name != "blank");
+        bool active_condition = game_data.staff_inventory[selected_staff].name != "blank";
+        staff_handle.enabled = active_condition;
+        staff_orb.enabled = active_condition;
+        staff_cover.enabled = active_condition;
+        staff_connector.enabled = active_condition;
         // Future modular visuals based on staff stats
+        if (!active_condition) return;
+        staff_handle.sprite = Resources.Load<Sprite>(game_data.staff_inventory[selected_staff].handle.img_filename);
+        staff_orb.sprite = Resources.Load<Sprite>(game_data.staff_inventory[selected_staff].orb.img_filename);
+        staff_cover.sprite = Resources.Load<Sprite>(game_data.staff_inventory[selected_staff].cover.img_filename);
+        staff_connector.sprite = Resources.Load<Sprite>(game_data.staff_inventory[selected_staff].connector.img_filename);
     }
 }
